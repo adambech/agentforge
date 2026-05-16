@@ -2,25 +2,34 @@ import subprocess
 import os
 import tempfile
 import shutil
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("bob_runner")
 
 def run_bob(prompt: str, work_dir: str) -> str:
     bob_path = shutil.which("bob") or "bob"
     
-    result = subprocess.run(
-        [
-            bob_path,
-            "--yolo",
-            "--chat-mode", "code",
-            "--hide-intermediary-output",
-            prompt
-        ],
-        capture_output=True,
-        text=True,
-        timeout=600,
-        cwd=work_dir
-    )
+    logger.info(f"Running bob in {work_dir} with timeout=1200s")
     
-    return result.stdout + result.stderr
+    try:
+        result = subprocess.run(
+            [
+                bob_path,
+                "--yolo",
+                "--chat-mode", "code",
+                prompt
+            ],
+            capture_output=True,
+            text=True,
+            timeout=1200,
+            cwd=work_dir
+        )
+        logger.info(f"Bob completed with return code {result.returncode} (stdout: {len(result.stdout)} chars, stderr: {len(result.stderr)} chars)")
+        return result.stdout + result.stderr
+    except subprocess.TimeoutExpired:
+        logger.warning(f"Bob timed out after 1200s in {work_dir}")
+        raise
 
 def collect_files(work_dir: str) -> dict:
     files = {}

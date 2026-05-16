@@ -28,6 +28,9 @@ class GenerateRequest(BaseModel):
     frontend: Optional[str] = "webchat"
     llm: Optional[str] = "gemini"
 
+class DownloadFilesRequest(BaseModel):
+    files: dict[str, str]
+
 @app.get("/")
 def root():
     return {"message": "AgentForge API is running"}
@@ -56,10 +59,12 @@ def generate(req: GenerateRequest):
     try:
         bob_output = run_bob(prompt, work_dir)
     except Exception as e:
-        # Even if Bob times out, collect whatever it generated
         bob_output = str(e)
     
     files = collect_files(work_dir)
+    
+    if not files:
+        files = extract_files_simple(bob_output)
     
     if not files:
         return {"error": "Bob did not generate any files", "raw_output": bob_output, "work_dir": work_dir}
@@ -80,13 +85,32 @@ def generate_and_download(req: GenerateRequest):
         frontend=req.frontend,
         llm=req.llm
     )
-    bob_output = run_bob(prompt)
-    files = extract_files_simple(bob_output)
+    
+    work_dir = f"/tmp/agentforge_{uuid.uuid4().hex[:8]}"
+    os.makedirs(work_dir, exist_ok=True)
+    subprocess.run(["git", "init"], cwd=work_dir, capture_output=True)
+    subprocess.run(["git", "commit", "--allow-empty", "-m", "init"], cwd=work_dir, capture_output=True)
+    
+    try:
+        bob_output = run_bob(prompt, work_dir)
+    except Exception as e:
+        bob_output = str(e)
+    
+    files = collect_files(work_dir)
 
     if not files:
         return {"error": "Bob did not generate any files"}
 
     zip_bytes = create_zip(files)
+    return Response(
+        content=zip_bytes,
+        media_type="application/zip",
+        headers={"Content-Disposition": "attachment; filename=agentforge-project.zip"}
+    )
+
+@app.post("/generate/download-files")
+def download_files(req: DownloadFilesRequest):
+    zip_bytes = create_zip(req.files)
     return Response(
         content=zip_bytes,
         media_type="application/zip",

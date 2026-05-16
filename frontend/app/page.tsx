@@ -24,6 +24,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
+  const [downloadError, setDownloadError] = useState("");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
   const generate = async () => {
@@ -52,17 +53,26 @@ export default function Home() {
   };
 
   const download = async () => {
-    const res = await fetch(`${API_URL}/generate/download`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ description, auth, audit, frontend, llm })
-    });
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "agentforge-project.zip";
-    a.click();
+    setDownloadError("");
+    try {
+      const res = await fetch(`${API_URL}/generate/download-files`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ files: result.files })
+      });
+      if (!res.ok) {
+        setDownloadError("Download failed (server error)");
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "agentforge-project.zip";
+      a.click();
+    } catch {
+      setDownloadError("Failed to connect to AgentForge backend");
+    }
   };
 
   return (
@@ -139,6 +149,7 @@ export default function Home() {
               <div className="flex gap-3">
                 <Button variant="secondary" onClick={() => setResult(null)}>Generate another</Button>
                 <Button onClick={download}>Download ZIP</Button>
+                {downloadError && <p className="text-destructive text-sm self-center">{downloadError}</p>}
               </div>
             </div>
             <div className="grid grid-cols-4 gap-4 h-[600px]">
