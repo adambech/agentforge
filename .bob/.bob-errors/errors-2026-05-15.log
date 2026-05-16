@@ -1,0 +1,21 @@
+
+================================================================================
+ERROR LOGGED: 2026-05-15T23:24:23.420Z
+================================================================================
+Error Name: TypeError
+Error Message: fetch failed
+
+Stack Trace:
+TypeError: fetch failed
+    at node:internal/deps/undici/undici:14976:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Cqs (file:///home/adam/.local/share/fnm/node-versions/v22.22.3/installation/lib/node_modules/bobshell/bundle/bob.js:2088:463)
+    at async w9n (file:///home/adam/.local/share/fnm/node-versions/v22.22.3/installation/lib/node_modules/bobshell/bundle/bob.js:2088:1946)
+    at async r (file:///home/adam/.local/share/fnm/node-versions/v22.22.3/installation/lib/node_modules/bobshell/bundle/bob.js:2150:2832)
+    at async dnt.handleSSOAuth (file:///home/adam/.local/share/fnm/node-versions/v22.22.3/installation/lib/node_modules/bobshell/bundle/bob.js:2150:2881)
+    at async dnt.setup (file:///home/adam/.local/share/fnm/node-versions/v22.22.3/installation/lib/node_modules/bobshell/bundle/bob.js:2150:1261)
+    at async R9n (file:///home/adam/.local/share/fnm/node-versions/v22.22.3/installation/lib/node_modules/bobshell/bundle/bob.js:2169:446)
+    at async file:///home/adam/.local/share/fnm/node-versions/v22.22.3/installation/lib/node_modules/bobshell/bundle/bob.js:2169:1965
+    at async LZt (file:///home/adam/.local/share/fnm/node-versions/v22.22.3/installation/lib/node_modules/bobshell/bundle/bob.js:2169:1523)
+================================================================================
+
